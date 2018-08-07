@@ -48,7 +48,6 @@ Image sequence and code snippets to achieve the above are shown below
 ![all text](./output/warped_example.jpg)
 
 ![all text](./output/warped_threshed.jpg)
-![all text](./output/masked_example.jpg)
 
 ```
 def perspect_transform(img, src, dst):
@@ -82,8 +81,15 @@ def find_rocks(img, levels = (110,110,50)):
 
 * **process_image()** contents how the worldmap is populated and video output
   - ground_truth_map is read from ./calibration_images/map_bw.png
-  - world map is created by populating 255 values for pixel positions where navigaballe terrain, obstacles or rocks or found respectively.
-  - the world map is superimposed on ground truth map
+  - before creating the world map, we need to convert the pixel coordinates to rover centric and then world coordinates.
+  
+```
+x_pix, y_pix = rover_coords(threshed)
+x_world, y_world = pix_to_world(x_pix,y_pix,xpos,ypos,yaw,world_size,scale)
+```
+
+   world map is created by populating 255 values for pixel positions where navigaballe terrain, obstacles or rocks or found         respectively.
+   the world map is superimposed on ground truth map.
 
 ![all text](./calibration_images/map_bw.png)
 
@@ -107,9 +113,10 @@ The video output is located at ./output/test_mappingrec.mp4
 ### Autonomous navigation and mapping
 
 * **perception_setp()** 
- - This is almost the same as the process_image() in the notebook analysis except the input is from the Rover object.
+
+  - This is almost the same as the process_image() in the notebook analysis except the input is from the Rover object.
 Update the RGB channels of worldmap wrt to obstacle, terrain and rocks respectively
- - Navigation angles are updated
+  - Navigation angles are updated
 
 ```
 Rover.vision_image[:,:,2] = threshed * 255
@@ -131,6 +138,7 @@ Rover.nav_angles = angles
 ### Simulator settings
 
 Roversim_x86_64.exe
+
 Graphics:
   - Screen: 800 x 600
   - Graphics quality: Good
